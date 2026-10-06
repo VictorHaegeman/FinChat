@@ -1,0 +1,5 @@
+bin/
+obj/
+.vs/
+*.user
+server_log.txt
