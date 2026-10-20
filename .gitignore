@@ -7,9 +7,6 @@ server_log.txt
 # API key : never on GitHub
 finnhub_key.txt
 
-# personal revision notes for the oral (kept on the PC only)
-docs/COURS.md
-docs/JUSTIFICATIONS.md
 
 # local tool folders (Claude, Jolli)
 .claude/

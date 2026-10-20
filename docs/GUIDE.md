@@ -24,7 +24,7 @@ Ce fichier sert à retrouver vite n'importe quoi dans le code.
 
 Autres fichiers à la racine : `start-server.bat` et `start-client.bat` (lancement en double-clic), `finnhub_key.example.txt` (modèle du fichier de clé), `.gitignore` (ce qui ne va pas sur GitHub : `bin/`, `obj/`, `finnhub_key.txt`, `server_log.txt`).
 
-Autres documents : `ARCHITECTURE.md` (schémas), `COURS.md` (le cours relié au code + questions d'oral, gardé sur le PC, pas sur GitHub), `JUSTIFICATIONS.md` (chaque choix du code justifié par une slide, pour l'oral, gardé sur le PC aussi), `TESTS.md` (plan de test), `RAPPORT.md` (doc à rendre).
+Autres documents : `ARCHITECTURE.md` (schémas), `COURS.md` (le cours relié au code + questions d'oral), `JUSTIFICATIONS.md` (chaque choix du code justifié par une slide, pour l'oral), `TESTS.md` (plan de test), `RAPPORT.md` (doc à rendre).
 
 Chaque fichier commence par un en-tête : son rôle, les chapitres du cours utilisés, et le plan du fichier (`#region`). Dans Cursor, les `#region` se replient avec la petite flèche dans la marge.
 

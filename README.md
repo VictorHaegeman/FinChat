@@ -113,6 +113,8 @@ Détails : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 | [docs/GUIDE.md](docs/GUIDE.md) | Carte du code : quel fichier, quelle méthode pour chaque fonction |
 | [docs/TESTS.md](docs/TESTS.md) | Plan de test et résultats |
 | [docs/RAPPORT.md](docs/RAPPORT.md) | Documentation à rendre (architecture, implémentation, captures) |
+| [docs/COURS.md](docs/COURS.md) | Le cours relié au code, chapitre par chapitre, avec les questions possibles à l'oral |
+| [docs/JUSTIFICATIONS.md](docs/JUSTIFICATIONS.md) | Chaque choix du code justifié par une slide du cours, expliqué pour débutant |
 
 ---
 
