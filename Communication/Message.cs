@@ -1,8 +1,28 @@
+// =====================================================================
+//  Message.cs  (project Communication, shared by the server and the client)
+//
+//  Role   : all the messages that travel on the network.
+//           Same idea as Expr / Result in the professor's skeleton.
+//
+//  Message      interface implemented by every message
+//  LoginMsg     client -> server   first message (username)
+//  ChatMsg      both directions    public message in a channel
+//  PrivateMsg   both directions    private message (/msg)
+//  CommandMsg   client -> server   /name /users /join /quit
+//  InfoMsg      server -> client   information or error
+//  UserListMsg  server -> client   list of the connected users
+//
+//  Course : [COURS 2 - Classification] interface + polymorphism
+//           [COURS 6 - Serialization]  [Serializable] : can be sent with BinaryFormatter
+//           [COURS 1 - Basics]         private attributes + read-only properties
+// =====================================================================
+
 using System;
 
 namespace Communication
 {
-    // like in the skeleton : every message sent on the network implements Message
+    // every message sent on the network implements Message   [COURS 2 - Classification]
+    // the receiver finds the real type with "is" and a cast
     public interface Message
     {
         string ToString();

@@ -1,14 +1,25 @@
+// =====================================================================
+//  Logger.cs  (project ChatServer)
+//
+//  Role   : server activity (connections, disconnections, messages,
+//           errors) displayed in the console AND written in server_log.txt
+//           (project : "Log server activity")
+//
+//  Course : [COURS 5 - IO]     StreamWriter
+//           [LAB 4 - lock]     several threads can log at the same time
+//           [COURS 1 - Basics] static method and static attribute
+// =====================================================================
+
 using System;
 using System.IO;
 
 namespace ChatServer
 {
-    // server activity : displayed in the console AND written in server_log.txt
     public class Logger
     {
         private const string fileName = "server_log.txt";
 
-        // several threads can log at the same time : static lock object (Lab 4)
+        // [LAB 4 - lock] static : the SAME lock object for all the threads
         private static object access_grant = new object();
 
         public static void log(string text)
@@ -21,7 +32,7 @@ namespace ChatServer
 
                 try
                 {
-                    // true = append at the end of the file (IO course : StreamWriter)
+                    // [COURS 5 - IO] true = append at the end of the file
                     using (StreamWriter sw = new StreamWriter(fileName, true))
                     {
                         sw.WriteLine(line);

@@ -1,3 +1,30 @@
+// =====================================================================
+//  Form1.cs  (project ChatClient)
+//
+//  Role   : the chat window (like Form1 of ClientGuiCalculator in the
+//           skeleton). Connects to the server, sends what the user types,
+//           and displays what the server sends.
+//
+//  2 threads :
+//      - UI thread        : buttons, typing, sending
+//      - receiveThread    : waits for the messages of the server, then
+//                           asks the UI thread to display them (Invoke)
+//
+//  Course : [COURS 4 - Network]        TcpClient, GetStream
+//           [COURS 4 - Threads]        receiveThread
+//           [LAB 2 - Invoke]           InvokeRequired + Invoke (thread-safe display)
+//           [COURS 3 - Delegates]      displayDelegate, disconnectedDelegate for Invoke,
+//                                      Click += new EventHandler(...) in Form1.Designer.cs
+//           [COURS 2 - Classification] "is" + cast on the received messages
+//
+//  Map of the file :
+//      #region Attributes
+//      #region Buttons and controls   Connect, Disconnect, Send, Channel, Users, closing
+//      #region Commands               sendCommand()  (/msg /name /users /join /quit /help)
+//      #region Network                send(), receive(), disconnect()
+//      #region Display (Invoke)       display(), disconnected(), addLine(), setConnected()
+// =====================================================================
+
 using System;
 using System.Net.Sockets;
 using System.Threading;
@@ -8,12 +35,14 @@ using Message = Communication.Message;
 
 namespace ChatClient
 {
-    // delegates used to come back on the UI thread with Invoke (Lab 2)
+    // [LAB 2 - Invoke] [COURS 3 - Delegates] delegates used to come back on the UI thread
     public delegate void displayDelegate(Message msg);
     public delegate void disconnectedDelegate();
 
     public partial class Form1 : Form
     {
+        #region Attributes
+
         private TcpClient comm;
         private Thread receiveThread;
         private bool connected = false;
@@ -26,7 +55,9 @@ namespace ChatClient
             setConnected(false);
         }
 
-        // ==================== buttons ====================
+        #endregion
+
+        #region Buttons and controls
 
         private void buttonConnect_Click(object sender, EventArgs e)
         {
@@ -39,7 +70,7 @@ namespace ChatClient
 
             try
             {
-                // connection to the server (like the skeleton)
+                // [COURS 4 - Network] connection to the server (like the skeleton)
                 comm = new TcpClient(textBoxHost.Text.Trim(), int.Parse(textBoxPort.Text.Trim()));
             }
             catch (Exception ex)
@@ -54,7 +85,7 @@ namespace ChatClient
             setConnected(true);
             listBoxUsers.Items.Clear();
 
-            // thread that receives the messages of the server
+            // [COURS 4 - Threads] thread that receives the messages of the server
             receiveThread = new Thread(new ThreadStart(receive));
             receiveThread.Start();
 
@@ -113,7 +144,9 @@ namespace ChatClient
             disconnect();
         }
 
-        // ==================== commands ====================
+        #endregion
+
+        #region Commands
 
         // "/msg bob hello" -> command "msg", argument "bob hello"
         private void sendCommand(string text)
@@ -140,6 +173,16 @@ namespace ChatClient
             {
                 disconnect();
             }
+            else if (cmd == "help")
+            {
+                // answered by the client itself, nothing is sent to the server
+                addLine("[help] text              : public message in the current channel");
+                addLine("[help] /msg user text    : private message");
+                addLine("[help] /name newname     : change your username");
+                addLine("[help] /users            : list of the connected users");
+                addLine("[help] /join general     : go to #general (or /join finance)");
+                addLine("[help] /quit             : leave the chat");
+            }
             else if (cmd == "join" && comboBoxChannel.Items.Contains(arg.ToLower()))
             {
                 // changing the combo box sends the /join (comboBoxChannel_SelectedIndexChanged)
@@ -152,7 +195,9 @@ namespace ChatClient
             }
         }
 
-        // ==================== network ====================
+        #endregion
+
+        #region Network
 
         private void send(Message msg)
         {
@@ -198,18 +243,20 @@ namespace ChatClient
             listBoxUsers.Items.Clear();
         }
 
-        // ==================== display (thread-safe, Lab 2) ====================
+        #endregion
+
+        #region Display (thread-safe with Invoke)
 
         private void display(Message msg)
         {
             if (InvokeRequired)
             {
-                // we are in receiveThread : ask the UI thread to run display()
+                // [LAB 2 - Invoke] we are in receiveThread : ask the UI thread to run display()
                 Invoke(new displayDelegate(display), new object[] { msg });
                 return;
             }
 
-            if (msg is UserListMsg)
+            if (msg is UserListMsg)   // [COURS 2 - Classification]
             {
                 listBoxUsers.Items.Clear();
                 foreach (string user in ((UserListMsg)msg).Users)
@@ -274,5 +321,7 @@ namespace ChatClient
                 Text = "FinChat";
             }
         }
+
+        #endregion
     }
 }

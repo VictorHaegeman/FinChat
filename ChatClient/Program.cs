@@ -1,3 +1,8 @@
+// =====================================================================
+//  Program.cs  (project ChatClient)
+//  Role : entry point of the client, opens the chat window (Form1)
+// =====================================================================
+
 using System;
 using System.Windows.Forms;
 

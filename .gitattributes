@@ -1,0 +1,4 @@
+# git normalizes the line endings (Windows / Linux)
+* text=auto
+*.png binary
+*.jpg binary

@@ -1,3 +1,11 @@
+// =====================================================================
+//  Form1.Designer.cs  (project ChatClient)
+//  Role : creates the controls of the window (position, colors, texts)
+//         and connects the events of the buttons to the methods of Form1.cs
+//         Example : buttonSend.Click += new System.EventHandler(this.buttonSend_Click);
+//  Course : [COURS 3 - Delegates] the "+=" on Click is an event subscription
+// =====================================================================
+
 namespace ChatClient
 {
     partial class Form1

@@ -1,20 +1,44 @@
+// =====================================================================
+//  Receiver.cs  (project ChatServer)
+//
+//  Role   : ONE object per connected client, running in its own thread
+//           (same idea as the Receiver class of the skeleton).
+//           - reads the messages of its client in a loop
+//           - sorts them by type and does the action
+//           - subscribes to the broadcast event of the Server
+//           - sends messages to its client
+//
+//  Course : [COURS 2 - Classification] "is" + cast to know the message type
+//           [COURS 3 - Delegates]      += / -= on the event, onBroadcast
+//           [COURS 4 - Threads]        doOperation() runs in a thread
+//           [COURS 2 - Exceptions]     try / catch when the client disappears
+//           [LAB 4 - lock]             one lock per client for sending
+//
+//  Map of the file :
+//      #region Attributes
+//      #region Reception loop        doOperation()
+//      #region Actions               login(), publicMessage(), command()
+//      #region Event handler         onBroadcast()
+//      #region Send / close          send(), close()
+// =====================================================================
+
 using System;
 using System.Net.Sockets;
 using Communication;
 
 namespace ChatServer
 {
-    // one Receiver per connected client, running in its own thread
-    // (same idea as the Receiver class of the skeleton)
     public class Receiver
     {
+        #region Attributes
+
         private TcpClient comm;
         private Server server;
         private string username = null;     // null until the login
         private string channel = "general";
 
-        // several threads can send to this client at the same time
-        // (a message from another user + an article) : one lock per client
+        // [LAB 4 - lock] several threads can send to this client at the same time
+        // (a message from another user + a finance article) : one lock per client
         private object send_grant = new object();
         private bool closed = false;
 
@@ -30,17 +54,21 @@ namespace ChatServer
             set { username = value; }
         }
 
-        // ==================== reception loop ====================
+        #endregion
 
+        #region Reception loop
+
+        // [COURS 4 - Threads] method run by the thread of this client
         public void doOperation()
         {
-            try
+            try   // [COURS 2 - Exceptions]
             {
                 while (!closed)
                 {
+                    // [COURS 6 - Serialization] waits for the next message
                     Message msg = Net.rcvMsg(comm.GetStream());
 
-                    // check the class with "is", then cast (Classification course)
+                    // [COURS 2 - Classification] check the class with "is", then cast
                     if (msg is LoginMsg)
                     {
                         login((LoginMsg)msg);
@@ -76,7 +104,9 @@ namespace ChatServer
             close(null);
         }
 
-        // ==================== actions ====================
+        #endregion
+
+        #region Actions (login, public message, commands)
 
         private void login(LoginMsg msg)
         {
@@ -102,11 +132,11 @@ namespace ChatServer
                 return;
             }
 
-            // subscription to the event (Delegates course : +=)
+            // [COURS 3 - Delegates] subscription to the event (+=)
             server.BroadcastEvent += new MessageDelegate(onBroadcast);
 
             Logger.log(username + " logged in");
-            send(new InfoMsg("welcome " + username + ", you are in #general"));
+            send(new InfoMsg("welcome " + username + ", you are in #general (type /help for the commands)"));
             server.broadcast(new InfoMsg(username + " joined the chat"));
             server.sendUserList();
         }
@@ -118,6 +148,7 @@ namespace ChatServer
             Logger.log("[#" + channel + "] " + username + " : " + msg.Text);
         }
 
+        // /name, /users, /join, /quit
         private void command(CommandMsg msg)
         {
             string arg = "";
@@ -180,9 +211,12 @@ namespace ChatServer
             }
         }
 
-        // ==================== event handler ====================
+        #endregion
 
-        // called by the event for every broadcast (like PrimeReceiver.action in Lab 2)
+        #region Event handler
+
+        // [COURS 3 - Delegates] called by the event for EVERY broadcast
+        // (like receiver.action in the course and PrimeReceiver.action in Lab 2)
         public void onBroadcast(object sender, MessageEventArgs e)
         {
             // public messages are only for the users in the same channel
@@ -193,15 +227,17 @@ namespace ChatServer
             send(e.Msg);
         }
 
-        // ==================== sending / closing ====================
+        #endregion
+
+        #region Send / close
 
         public void send(Message msg)
         {
-            lock (send_grant)
+            lock (send_grant)   // [LAB 4 - lock] only one thread writes in this socket at a time
             {
                 try
                 {
-                    Net.sendMsg(comm.GetStream(), msg);
+                    Net.sendMsg(comm.GetStream(), msg);   // [COURS 6 - Serialization]
                 }
                 catch (Exception)
                 {
@@ -226,7 +262,7 @@ namespace ChatServer
                 send(new InfoMsg(reason));
             }
 
-            // unsubscription (Delegates course : -=)
+            // [COURS 3 - Delegates] unsubscription (-=)
             server.BroadcastEvent -= onBroadcast;
             server.removeClient(this);
             comm.Close();
@@ -251,5 +287,7 @@ namespace ChatServer
             }
             return username;
         }
+
+        #endregion
     }
 }

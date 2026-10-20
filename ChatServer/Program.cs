@@ -1,3 +1,14 @@
+// =====================================================================
+//  Program.cs  (project ChatServer)
+//
+//  Role   : entry point of the server. Creates the Server and the
+//           FinanceNews thread, then reads the commands typed in the
+//           console : start, stop, exit  (project : "Start and stop the server")
+//
+//  Course : [COURS 4 - Threads] the main thread reads the console while
+//           the other threads (listening, clients, finance) work
+// =====================================================================
+
 using System;
 
 namespace ChatServer
