@@ -1,6 +1,8 @@
 # Justifier nos choix à l'oral
 
-Chaque choix du code, avec la raison prise **dans le cours**. Pour chaque point :
+Chaque choix du code, avec la raison prise **dans le cours**.
+
+Chaque partie commence par un encadré **En clair (débutant)** : c'est quoi, où on s'en sert dans FinChat, et pourquoi on en a besoin ici. Ensuite, pour chaque choix :
 
 - **Code** : ce qu'on a fait, et où.
 - **Cours** : la slide qui le justifie.
@@ -40,7 +42,34 @@ Les références sont `Ch1 p11` = slide 11 du PDF « 1- Csharp basics ». Ch1 Ba
 
 ---
 
+## 0. Le projet en 1 minute (pour débutant)
+
+**FinChat, c'est quoi ?** Un chat comme Discord, en très simple.
+- Le **serveur** est un programme qui tourne en continu et attend. C'est comme un standard téléphonique.
+- Chaque **client** est une fenêtre ouverte par un utilisateur. Il se connecte au serveur.
+- Tous les messages passent par le serveur, qui les redistribue.
+- Un robot, **FinanceBot**, poste un article de finance toutes les heures dans le channel **#finance**.
+
+**Le chemin d'un message, étape par étape** (chaque étape = une notion du cours) :
+1. Alice tape « salut » et clique sur Send → la fenêtre réagit au clic grâce à un **event** (partie 11).
+2. Le client crée un objet `ChatMsg` (partie 3) et le transforme en octets pour l'envoyer : **sérialisation** (partie 4).
+3. Les octets passent par la connexion **TCP** jusqu'au serveur (partie 1).
+4. Côté serveur, un **thread** réservé à Alice attendait ses messages (partie 6). Il reconstruit l'objet et vérifie son type avec **`is`** (partie 3).
+5. Le serveur déclenche son **event** de diffusion : tous les `Receiver` abonnés le reçoivent. Il y a un `Receiver` par client connecté, côté serveur (partie 5).
+6. Chaque `Receiver` garde le message seulement si son client est dans le bon channel, puis le renvoie à son client par le réseau, protégé par un **`lock`** (partie 7).
+7. Chez Bob, le thread de réception reçoit le message et demande à la fenêtre de l'afficher avec **`Invoke`** (partie 11).
+8. Le serveur écrit une ligne dans **`server_log.txt`** (partie 9).
+9. Si quelqu'un ferme sa fenêtre brutalement, un **`try` / `catch`** évite que le serveur plante (partie 8).
+
+---
+
 ## 1. Organisation générale
+
+> **En clair (débutant)**
+> - **C'est quoi ?** Un programme **client-serveur** : le serveur attend, les clients se connectent à lui. Pour se trouver, il faut une **adresse IP** (quel ordinateur) et un **port** (quelle « porte » sur cet ordinateur). `127.0.0.1` veut dire « mon propre ordinateur ».
+> - **Le squelette** = le code de départ donné par le prof (`DistantCalculator`). On l'a gardé et on a remplacé la calculatrice par un chat.
+> - **Une DLL** = une boîte de code partagée. Ce n'est pas un programme qu'on lance : d'autres programmes l'utilisent. Notre DLL `Communication` contient les messages, utilisés à la fois par le serveur et par le client.
+> - **Pourquoi ici ?** Pour que le client et le serveur parlent exactement la même langue, et pour rester fidèle au squelette du prof.
 
 ### 1.1 Partir du squelette `DistantCalculator`
 - **Code :** 3 projets comme le squelette : `Communication` (messages + `Net`), `ChatServer` (`Server` + `Receiver`), `ChatClient` (fenêtre).
@@ -69,6 +98,15 @@ Les références sont `Ch1 p11` = slide 11 du PDF « 1- Csharp basics ». Ch1 Ba
 ---
 
 ## 2. Classes et encapsulation (Ch1)
+
+> **En clair (débutant)**
+> - **Classe** = un moule. **Objet** = ce qu'on fabrique avec le moule. Exemple : `ChatMsg` est le moule, chaque message envoyé est un objet.
+> - **Attribut** = une donnée rangée dans l'objet (le texte, l'expéditeur). **Méthode** = une action (envoyer, fermer).
+> - **`private`** = un tiroir fermé à clé : seule la classe elle-même a la clé. **`public`** = ouvert à tout le monde.
+> - **Propriété** (`get` / `set`) = un guichet devant le tiroir. `get` = « donne-moi la valeur », `set` = « remplace la valeur ». Sans `set`, on peut lire mais pas modifier.
+> - **`static`** = qui appartient à la classe, pas à chaque objet : il n'en existe **qu'un seul exemplaire**, partagé par tous. **`const`** = une valeur qui ne change jamais.
+> - **Où dans FinChat ?** `Message.cs` (attributs privés + `get`), `Logger.log()` (`static`), les constantes de `FinanceNews` et `Logger`.
+> - **Pourquoi ici ?** Pour qu'aucune autre partie du code ne puisse modifier une donnée par erreur ou tricher, par exemple changer le nom de l'expéditeur d'un message.
 
 ### 2.1 Tous les attributs sont `private`
 - **Code :** partout : `private string text;`, `private List<Receiver> clients;`, `private TcpClient comm;`…
@@ -112,6 +150,14 @@ Les références sont `Ch1 p11` = slide 11 du PDF « 1- Csharp basics ». Ch1 Ba
 
 ## 3. Les messages : interface et polymorphisme (Ch2)
 
+> **En clair (débutant)**
+> - **Interface** = une étiquette, un contrat. `Message` dit juste « je suis un message ». Les 6 classes de messages portent cette étiquette.
+> - **Polymorphisme** = une variable de type `Message` peut contenir **n'importe lequel** des 6 messages. C'est comme un carton « colis » : dedans il peut y avoir un livre ou des chaussures.
+> - **`is`** = « est-ce que c'est un `ChatMsg` ? » (réponse oui ou non). **Cast** `(ChatMsg)msg` = « d'accord, traite-le maintenant comme un `ChatMsg` ». On vérifie avec `is` **avant** de caster, sinon le programme peut planter.
+> - **`override ToString()`** = chaque message explique lui-même comment il s'affiche en texte.
+> - **Où dans FinChat ?** `Message.cs` (interface + 6 classes), `Receiver.doOperation()` et `Form1.display()` (tri avec `is`).
+> - **Pourquoi ici ?** Quand un message arrive par le réseau, on ne sait pas encore de quel type il est. On l'ouvre comme un `Message`, puis on regarde ce qu'il y a dedans pour savoir quoi faire.
+
 ### 3.1 `interface Message` plutôt qu'une classe abstraite
 - **Code :** `public interface Message { string ToString(); }`, implémentée par les 6 messages.
 - **Cours :**
@@ -148,6 +194,14 @@ Les références sont `Ch1 p11` = slide 11 du PDF « 1- Csharp basics ». Ch1 Ba
 
 ## 4. Sérialisation (Ch6)
 
+> **En clair (débutant)**
+> - **Le problème :** un objet vit dans la mémoire d'un programme. Le réseau, lui, ne transporte que des **octets** (des 0 et des 1).
+> - **Sérialiser** = démonter l'objet en octets pour l'envoyer. **Désérialiser** = le remonter à l'identique de l'autre côté. Comme un meuble démonté dans un carton, puis remonté chez quelqu'un d'autre.
+> - **`[Serializable]`** = l'autorisation de démonter cet objet. Sans elle, .NET refuse.
+> - **`BinaryFormatter`** = l'outil qui démonte et remonte.
+> - **Où dans FinChat ?** `[Serializable]` sur les 6 messages (`Message.cs`) ; `Net.sendMsg()` (démonter + envoyer) et `Net.rcvMsg()` (recevoir + remonter).
+> - **Pourquoi ici ?** C'est ce qui permet d'envoyer un vrai objet `ChatMsg` d'un programme à un autre, au lieu de bricoler du texte.
+
 ### 4.1 `[Serializable]` sur chaque message
 - **Cours :** Ch6 p2 : « objects are not serializable by default ». Ch6 p4-5 : on ajoute `[Serializable]` à la classe.
 - **Sinon :** exception à l'envoi (`SerializationException`).
@@ -174,6 +228,13 @@ Les références sont `Ch1 p11` = slide 11 du PDF « 1- Csharp basics ». Ch1 Ba
 ---
 
 ## 5. Delegates et events (Ch3) — le cœur du sujet
+
+> **En clair (débutant)**
+> - **Delegate** = une variable qui contient une **méthode** au lieu d'un nombre. C'est comme un numéro de téléphone noté dans un carnet : on pourra appeler plus tard.
+> - Un delegate peut contenir **plusieurs** méthodes. L'appeler, c'est les appeler toutes, l'une après l'autre.
+> - **Event** = une liste d'abonnés, comme une newsletter. `+=` = s'abonner, `-=` = se désabonner. Seul celui qui a créé l'event peut « envoyer la newsletter ».
+> - **Où dans FinChat ?** `Server.BroadcastEvent` (la newsletter), `Receiver.onBroadcast()` (ce que fait chaque abonné quand il la reçoit), `+=` dans `login()`, `-=` dans `close()`.
+> - **Pourquoi ici ?** Quand Alice écrit, le serveur déclenche l'event **une seule fois** et tous les clients connectés le reçoivent. Chacun garde le message seulement s'il est dans le bon channel. C'est exactement ce que demande le sujet : « broadcast using delegates ».
 
 Le sujet demande : *« Broadcast messages to all connected clients using delegates »*.
 
@@ -217,6 +278,13 @@ Le sujet demande : *« Broadcast messages to all connected clients using delegat
 
 ## 6. Threads (Ch4)
 
+> **En clair (débutant)**
+> - **Thread** = un « fil » d'exécution, comme un employé qui fait une tâche. Un programme simple a un seul employé, qui fait une chose à la fois. Avec plusieurs threads, plusieurs employés travaillent **en même temps**.
+> - **Bloquant** = une instruction qui attend. `rcvMsg` attend qu'un message arrive : l'employé reste planté devant la porte et ne fait rien d'autre.
+> - **`Sleep`** = faire dormir le thread un certain temps. **`Abort`** = arrêter le thread de force.
+> - **Où dans FinChat ?** `Server.listen()` (attend les nouveaux clients), `Receiver.doOperation()` (un par client), `FinanceNews.run()` (le robot finance), `Form1.receive()` (réception côté client).
+> - **Pourquoi ici ?** Le serveur doit écouter **plusieurs clients à la fois** et accepter de nouveaux clients en même temps. Avec un seul employé, il resterait bloqué à attendre le premier client. Côté client, sans thread de réception, la fenêtre serait gelée.
+
 ### 6.1 Un thread d'écoute
 - **Code :** `new Thread(new ThreadStart(listen)).Start();` dans `Server.start()`.
 - **Cours :** Ch4 p31 : `AcceptTcpClient(); // blocking`. Ch4 p5-7 : création d'un thread avec `ThreadStart`.
@@ -258,6 +326,13 @@ Le sujet demande : *« Broadcast messages to all connected clients using delegat
 
 ## 7. Synchronisation (Ch4, Lab 4)
 
+> **En clair (débutant)**
+> - **Le problème :** plusieurs threads touchent la **même** chose en même temps, par exemple la liste des clients ou le même socket. C'est comme deux personnes qui écrivent sur la même feuille au même moment : ça donne un gribouillis.
+> - **`lock`** = la clé des toilettes : un seul thread entre à la fois, les autres attendent leur tour. La clé est rendue **automatiquement** en sortant du bloc.
+> - **Objet `static`** pour le `lock` = tout le monde utilise **la même** clé. Si chacun avait sa propre clé, le verrou ne servirait à rien.
+> - **Où dans FinChat ?** `Server` (la liste des clients), `Receiver.send()` (un verrou par client), `Logger.log()` (le fichier de log).
+> - **Pourquoi ici ?** Sans verrou, deux messages envoyés en même temps au même client arriveraient mélangés, et la liste des clients pourrait être abîmée.
+
 ### 7.1 `lock` sur la liste des clients
 - **Code :** `lock (access_grant)` dans `addClient`, `removeClient`, `reserveName`, `getUsers`, `findClient`.
 - **Cours :** Ch4 p18 : plusieurs threads partagent une ressource → **section critique**, un seul à la fois, avec `lock`. Ch4 p22 : un thread qui arrive pendant le verrou attend son tour.
@@ -293,6 +368,12 @@ Le sujet demande : *« Broadcast messages to all connected clients using delegat
 
 ## 8. Exceptions (Ch2)
 
+> **En clair (débutant)**
+> - **Exception** = une erreur qui arrive pendant que le programme tourne : connexion coupée, fichier absent, Internet en panne… Si on ne fait rien, **le programme s'arrête net**.
+> - **`try`** = « essaie de faire ça ». **`catch`** = « si ça rate, fais plutôt ça ». C'est un filet de sécurité.
+> - **Où dans FinChat ?** `Receiver.doOperation()` et `Form1.receive()` (déconnexion), `Server.listen()` (arrêt du serveur), `FinanceNews` (pas de clé, API en panne), `Logger` (fichier inaccessible).
+> - **Pourquoi ici ?** Un client qui ferme sa fenêtre, c'est normal. Sans `try` / `catch`, ça ferait planter tout le serveur pour tout le monde.
+
 ### 8.1 `try` / `catch` autour de la réception
 - **Code :** `Receiver.doOperation()`, `Form1.receive()`.
 - **Cours :** Ch2 p34 (« defensive coding ») : prévoir les événements extérieurs, comme « connection lost ». Ch2 p35 : une exception non attrapée « brutally end program execution ».
@@ -315,6 +396,12 @@ Le sujet demande : *« Broadcast messages to all connected clients using delegat
 
 ## 9. Fichiers (Ch5)
 
+> **En clair (débutant)**
+> - **Stream (flux)** = un tuyau entre le programme et un fichier. **`StreamWriter`** écrit du texte dedans, **`StreamReader`** lit du texte.
+> - **`using`** = ferme le tuyau automatiquement à la fin, même s'il y a une erreur.
+> - **Où dans FinChat ?** `Logger.log()` écrit chaque événement dans `server_log.txt` ; `FinanceNews.readKey()` lit la clé API dans `finnhub_key.txt`.
+> - **Pourquoi ici ?** Le sujet demande de garder une trace de l'activité du serveur (connexions, messages, erreurs). Et la clé API reste dans un fichier à part pour ne pas la publier sur GitHub.
+
 ### 9.1 `StreamWriter` pour le log
 - **Code :** `new StreamWriter("server_log.txt", true)` (`true` = ajouter à la fin).
 - **Cours :** Ch5 p2 : `StreamReader` / `StreamWriter` = IO « interpreted » (texte). Ch5 p5 : `BinaryReader` / `BinaryWriter` = IO « raw » (octets).
@@ -332,6 +419,13 @@ Le sujet demande : *« Broadcast messages to all connected clients using delegat
 
 ## 10. Collections et generics (Ch7, Ch8)
 
+> **En clair (débutant)**
+> - **Collection** = une liste d'objets qui peut grandir ou rétrécir. Un tableau, lui, a une taille fixe.
+> - **`List<Receiver>`** : ce qui est entre `< >` dit **quel type** on a le droit de mettre dedans. C'est une boîte étiquetée « seulement des `Receiver` ». C'est ça, un **generic**.
+> - `Add` = ajouter, `Remove` = retirer, `Count` = combien il y en a.
+> - **Où dans FinChat ?** `Server.clients` (les clients connectés), `getUsers()` (la liste des pseudos).
+> - **Pourquoi ici ?** Le nombre de clients change tout le temps (connexions, déconnexions) : il faut une liste qui s'adapte. Et grâce au `< >`, impossible d'y mettre autre chose par erreur.
+
 ### 10.1 `List<Receiver>` plutôt qu'`ArrayList`
 - **Cours :**
   - Ch8 p1 : les collections d'objets (`ArrayList`…) obligent à caster en sortie (« Typecast on removal »).
@@ -346,6 +440,14 @@ Le sujet demande : *« Broadcast messages to all connected clients using delegat
 ---
 
 ## 11. Le client Windows Forms (Lab 2)
+
+> **En clair (débutant)**
+> - **Windows Forms** = la bibliothèque pour faire des fenêtres avec des boutons, des zones de texte, des listes.
+> - **La règle :** seul le thread qui a créé la fenêtre a le droit de la modifier. C'est comme une voiture : seul le conducteur touche le volant.
+> - **`Invoke`** = le thread de réception (le passager) donne le message au thread de la fenêtre (le conducteur) et lui demande de l'afficher.
+> - **Les clics sont aussi des events :** cliquer sur Send déclenche l'event `Click`, et notre méthode `buttonSend_Click` est abonnée à cet event.
+> - **Où dans FinChat ?** `Form1.cs` (`display()`, `disconnected()`, les méthodes `..._Click`), `Form1.Designer.cs` (les abonnements `+=`).
+> - **Pourquoi ici ?** Les messages arrivent dans le thread de réception, mais c'est la fenêtre qui doit les afficher. Sans `Invoke`, on a l'erreur « cross-thread operation ».
 
 ### 11.1 `InvokeRequired` + `Invoke`
 - **Code :** `display()` et `disconnected()` dans `Form1`.
@@ -368,6 +470,13 @@ Le sujet demande : *« Broadcast messages to all connected clients using delegat
 ---
 
 ## 12. Hors cours (à assumer)
+
+> **En clair (débutant)**
+> - **API** = un site web qui répond avec des **données** au lieu d'une page à afficher. Ici, Finnhub nous donne les dernières actualités financières.
+> - **HTTP** = le langage du web (celui du navigateur). **JSON** = un format de texte pour les données, par exemple `{"headline": "...", "source": "Reuters"}`.
+> - **`WebClient`** télécharge la réponse ; **`DataContractJsonSerializer`** transforme ce texte JSON en objet `Article`.
+> - **Où dans FinChat ?** Uniquement dans `FinanceNews.getLastArticle()`.
+> - **Pourquoi ici ?** Le sujet demande un article financier venant d'une API. Le cours ne montre pas HTTP ni JSON, donc on a gardé cette partie très petite et isolée.
 
 ### 12.1 Requête HTTP et lecture du JSON
 - **Code :** uniquement dans `FinanceNews.getLastArticle()` : `WebClient.DownloadString` puis `DataContractJsonSerializer`.

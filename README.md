@@ -4,9 +4,7 @@ Application de chat **client–serveur en C#** (.NET Framework 4.8, TCP, threads
 
 Elle part du squelette **DistantCalculator** fourni par le professeur et ajoute un channel **#finance** qui reçoit automatiquement un article financier toutes les heures (API Finnhub).
 
-<!-- Décommenter quand la capture est ajoutée dans docs/screenshots/ :
-![Deux clients connectés](docs/screenshots/01-deux-clients.png)
--->
+![Trois clients connectés dans #general](docs/screenshots/01-echange-public.png)
 
 ---
 
@@ -113,6 +111,7 @@ Détails : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 | [docs/GUIDE.md](docs/GUIDE.md) | Carte du code : quel fichier, quelle méthode pour chaque fonction |
 | [docs/TESTS.md](docs/TESTS.md) | Plan de test et résultats |
 | [docs/RAPPORT.md](docs/RAPPORT.md) | Documentation à rendre (architecture, implémentation, captures) |
+| [docs/FinChat_Rapport.pdf](docs/FinChat_Rapport.pdf) | Le rapport en PDF, avec les captures d'écran |
 | [docs/COURS.md](docs/COURS.md) | Le cours relié au code, chapitre par chapitre, avec les questions possibles à l'oral |
 | [docs/JUSTIFICATIONS.md](docs/JUSTIFICATIONS.md) | Chaque choix du code justifié par une slide du cours, expliqué pour débutant |
 

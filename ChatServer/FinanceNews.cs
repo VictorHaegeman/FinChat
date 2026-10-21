@@ -66,7 +66,7 @@ namespace ChatServer
         private const string URL = "https://finnhub.io/api/v1/news?category=general&token=";
 
         // 3 600 000 ms = 1 hour (put 60000 = 1 minute for the demo)
-        private const int INTERVAL = 3600000;
+        private const int INTERVAL = 60000;
 
         private Server server;
         private Thread thread;

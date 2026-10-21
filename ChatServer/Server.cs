@@ -78,7 +78,7 @@ namespace ChatServer
                 return;
             }
 
-            // [COURS 4 - Network] 127.0.0.1 like in the course and the skeleton (this computer only)
+            // [COURS 4 - Network] 127.0.0.1 like in the course and the skeleton 
             // use IPAddress.Any to accept clients from other computers
             listener = new TcpListener(new IPAddress(new byte[] { 127, 0, 0, 1 }), port);
             listener.Start();
@@ -112,7 +112,7 @@ namespace ChatServer
             Logger.log("server stopped");
         }
 
-        // listening thread : waits for the connections (like start() in the skeleton)
+        // listening thread : waits for the connections (like start())
         private void listen()
         {
             try

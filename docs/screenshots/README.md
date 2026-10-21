@@ -1,14 +1,13 @@
-# Captures d'écran à prendre
+# Captures d'écran
 
-Mettre les fichiers PNG dans ce dossier avec ces noms (ils sont utilisés dans `README.md`, `TESTS.md` et `RAPPORT.md`).
+Utilisées dans `docs/RAPPORT.md` et `docs/TESTS.md`.
 
-| Fichier | Quoi montrer |
+| Fichier | Ce qu'elle montre |
 |---|---|
-| `01-deux-clients.png` | 2 fenêtres côte à côte (alice et bob) avec un échange dans #general |
-| `02-message-prive.png` | Un message privé `/msg` visible chez les 2 personnes concernées |
-| `03-finance.png` | Une fenêtre dans #finance avec un article de FinanceBot |
-| `04-commandes.png` | `/help`, `/users` et `/name` dans une fenêtre |
-| `05-console-serveur.png` | La console du serveur pendant les tests |
-| `06-log.png` | Le fichier `server_log.txt` ouvert |
-
-Astuce Windows : `Win + Shift + S` pour capturer une zone de l'écran.
+| `01-echange-public.png` | 3 clients (Alice, Bob, Chloé) dans #general, échange public |
+| `02-message-prive.png` | Message privé Chloé → Alice, invisible chez Bob |
+| `03-finance.png` | #finance avec l'article de FinanceBot, retour de Bob dans #general |
+| `04-commandes.png` | `/help` et `/name Alice2` |
+| `05-deconnexion.png` | Bob se déconnecte : « Bob left the chat » |
+| `06-log.png` | Le fichier `server_log.txt` |
+| `07-articles-finance.png` | Plusieurs articles de FinanceBot et une commande inconnue |

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <!-- .NET Framework, like the professor's skeleton (BinaryFormatter) -->
+    <!-- .NET Framework, like skeleton -->
     <TargetFramework>net48</TargetFramework>
     <RootNamespace>Communication</RootNamespace>
   </PropertyGroup>

@@ -85,8 +85,8 @@ namespace ChatClient
             setConnected(true);
             listBoxUsers.Items.Clear();
 
-            // [COURS 4 - Threads] thread that receives the messages of the server
-            receiveThread = new Thread(new ThreadStart(receive));
+
+            receiveThread = new Thread(new ThreadStart(receive));// CRéation de thread pr recevoir un message
             receiveThread.Start();
 
             send(new LoginMsg(name));
@@ -218,7 +218,7 @@ namespace ChatClient
             {
                 while (true)
                 {
-                    Message msg = Net.rcvMsg(comm.GetStream());
+                    Message msg = Net.rcvMsg(comm.GetStream()); // boucle de thread
                     display(msg);
                 }
             }
