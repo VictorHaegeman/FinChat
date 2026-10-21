@@ -143,4 +143,4 @@ FinChat/
 
 ## Auteurs
 
-Projet réalisé en binôme : Victor Haegeman et *(binôme)* — EFREI, ING2, cours Interface dev.
+Projet réalisé en binôme : Victor Haegeman et Eloi Dumas — EFREI, ING2, cours Interface dev.
